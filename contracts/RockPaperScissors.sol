@@ -87,13 +87,13 @@ contract RockPaperScissors {
             )
         );  
 
-        bytes32 hash = _getChoiceHashFor(maker, makersChoicePlain, salt);
+        bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
         require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
 
         string takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
         address taker = currentBet[msg.sender].taker;
         IERC20 token = IERC20(currentBet[msg.sender].payoutToken);
-        
+
         if (makersChoicePlain == takersChoicePlain) {
             token.transfer(msg.sender, 10 * 1e18);
             token.transfer(currentBet[msg.sender].taker, 10 * 1e18);
