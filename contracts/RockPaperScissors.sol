@@ -92,21 +92,23 @@ contract RockPaperScissors {
 
         string takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
         address taker = currentBet[msg.sender].taker;
+        IERC20 token = IERC20(currentBet[msg.sender].payoutToken);
+        
         if (makersChoicePlain == takersChoicePlain) {
             token.transfer(msg.sender, 10 * 1e18);
             token.transfer(currentBet[msg.sender].taker, 10 * 1e18);
         } else
         if (makersChoicePlain == "ROCK") {
-            if (takersChoicePlain == "SCISSORS") {  token.transfer(msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == "PAPER") {     token.transfer(currentBet[msg.sender].taker, 20 * 1e18); }
+            if (takersChoicePlain == "SCISSORS") {  token.transferFrom(taker, msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == "PAPER") {     token.transferFrom(msg.sender, taker, 20 * 1e18); }
         } else
         if (makersChoicePlain == "PAPER") {
-            if (takersChoicePlain == "ROCK") {      token.transfer(msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == "SCISSORS") {  token.transfer(currentBet[msg.sender].taker, 20 * 1e18); }
+            if (takersChoicePlain == "ROCK") {      token.transferFrom(taker, msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == "SCISSORS") {  token.transferFrom(msg.sender, taker, 20 * 1e18); }
         } else
         if (makersChoicePlain == "SCISSORS") {
-            if (takersChoicePlain == "PAPER") {     token.transfer(msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == "ROCK") {      token.transfer(currentBet[msg.sender].taker, 20 * 1e18); }
+            if (takersChoicePlain == "PAPER") {     token.transferFrom(taker, msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == "ROCK") {      token.transferFrom(msg.sender, taker, 20 * 1e18); }
         }
     }
 
