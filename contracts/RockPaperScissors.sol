@@ -84,15 +84,9 @@ contract RockPaperScissors {
             )
         );  
 
-        bytes32 hashStruct = keccak256(
-            abi.encode(
-                bytes32(makersChoicePlain),
-                keccak256(salt)
-            )
-        );
-
-        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", eip712DomainHash, hashStruct));
+        bytes32 hash = _getChoiceHashFor(maker, makersChoicePlain, salt);
         require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
+
         string takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
         if (makersChoicePlain == takersChoicePlain) {
             token.transfer(msg.sender, 10 * 1e18);
@@ -112,5 +106,17 @@ contract RockPaperScissors {
         }
     }
 
-    // getChoiceHash()
+    function getMyChoiceHash(string makersChoicePlain, string salt) view returns (bytes32 hash) {
+        hash = _getChoiceHash(msg.sender, makersChoicePlain, keccak256(salt));
+    }
+
+    function _getChoiceHashFor(address maker, string makersChoicePlain, string salt) pure returns (bytes32 hash) {
+        hash = keccak256(
+            abi.encodePacked(
+                maker,
+                makersChoicePlain,
+                salt
+            )
+        );
+    }
 }
