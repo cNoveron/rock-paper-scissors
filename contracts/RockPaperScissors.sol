@@ -71,6 +71,8 @@ contract RockPaperScissors {
     }
 
     function reveal(string makersChoicePlain, string salt) external {
+        uint chainId;
+        assembly {chainId := chainid()}
         
         bytes32 eip712DomainHash = keccak256(
             abi.encode(
