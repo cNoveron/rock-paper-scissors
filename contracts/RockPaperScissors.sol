@@ -19,6 +19,7 @@ contract RockPaperScissors {
         uint makersChoiceHash,
         uint takersChoicePlain,
     ) external {
+        //require(msg.sender != maker, "RPS: You can't play against yourself");
         require(block.timestamp < deadline, "Signed transaction expired");
 
         uint chainId;
