@@ -38,11 +38,11 @@ contract RockPaperScissors {
         );  
 
         bytes32 hashStruct = keccak256(
-        abi.encode(
-            keccak256("set(address sender,uint x,uint deadline)"),
-            sender,
-            x,
-            deadline
+            abi.encode(
+                keccak256("set(address sender,uint x,uint deadline)"),
+                sender,
+                x,
+                deadline
             )
         );
 
