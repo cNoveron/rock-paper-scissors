@@ -72,7 +72,7 @@ contract RockPaperScissors {
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 
-    function reveal(uint8 makersChoicePlain, string memory salt) external {
+    function reveal(uint8 makersChoicePlain, bytes memory salt) external {
         uint chainId;
         assembly {chainId := chainid()}
 
@@ -113,11 +113,11 @@ contract RockPaperScissors {
         }
     }
 
-    function getMyChoiceHash(uint8 makersChoicePlain, string memory salt) external view returns (bytes32 hash) {
-        hash = _getChoiceHashFor(msg.sender, makersChoicePlain, keccak256(salt));
+    function getMyChoiceHash(uint8 makersChoicePlain, bytes memory salt) external view returns (bytes32 hash) {
+        hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
     }
 
-    function _getChoiceHashFor(address maker, uint8 makersChoicePlain, string memory salt) private pure returns (bytes32 hash) {
+    function _getChoiceHashFor(address maker, uint8 makersChoicePlain, bytes memory salt) private pure returns (bytes32 hash) {
         hash = keccak256(
             abi.encodePacked(
                 maker,
