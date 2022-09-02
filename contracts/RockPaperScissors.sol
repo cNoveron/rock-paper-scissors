@@ -16,7 +16,7 @@ contract RockPaperScissors {
         address taker;
         uint256 deadline;
         bytes32 makersChoiceHash;
-        string takersChoicePlain;
+        uint8 takersChoicePlain;
         address payoutToken;
     }
 
@@ -30,7 +30,7 @@ contract RockPaperScissors {
         address maker,
         uint256 deadline,
         bytes32 makersChoiceHash,
-        string memory takersChoicePlain,
+        uint8 takersChoicePlain,
         address payoutToken
     ) external {
         //require(msg.sender != maker, "take: You can't play against yourself");
@@ -53,7 +53,7 @@ contract RockPaperScissors {
 
         bytes32 hashStruct = keccak256(
             abi.encode(
-                keccak256("TakenBet(address maker,uint256 deadline,bytes32 makersChoiceHash,string takersChoicePlain,address payoutToken)"),
+                keccak256("TakenBet(address maker,uint256 deadline,bytes32 makersChoiceHash,uint8 takersChoicePlain,address payoutToken)"),
                 maker,
                 deadline,
                 makersChoiceHash,
@@ -72,7 +72,7 @@ contract RockPaperScissors {
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 
-    function reveal(string memory makersChoicePlain, string memory salt) external {
+    function reveal(uint8 makersChoicePlain, string memory salt) external {
         uint chainId;
         assembly {chainId := chainid()}
 
@@ -91,7 +91,7 @@ contract RockPaperScissors {
         bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
         require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
 
-        string memory takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
+        uint8 takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
         address taker = currentBet[msg.sender].taker;
         IERC20 token = IERC20(currentBet[msg.sender].payoutToken);
 
@@ -99,25 +99,25 @@ contract RockPaperScissors {
             token.transfer(msg.sender, 10 * 1e18);
             token.transfer(currentBet[msg.sender].taker, 10 * 1e18);
         } else
-        if (makersChoicePlain == "ROCK") {
-            if (takersChoicePlain == "SCISSORS") {  token.transferFrom(taker, msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == "PAPER") {     token.transferFrom(msg.sender, taker, 20 * 1e18); }
+        if (makersChoicePlain == 1) {
+            if (takersChoicePlain == 3) {   token.transferFrom(taker, msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == 2) {   token.transferFrom(msg.sender, taker, 20 * 1e18); }
         } else
-        if (makersChoicePlain == "PAPER") {
-            if (takersChoicePlain == "ROCK") {      token.transferFrom(taker, msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == "SCISSORS") {  token.transferFrom(msg.sender, taker, 20 * 1e18); }
+        if (makersChoicePlain == 2) {
+            if (takersChoicePlain == 1) {   token.transferFrom(taker, msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == 3) {   token.transferFrom(msg.sender, taker, 20 * 1e18); }
         } else
-        if (makersChoicePlain == "SCISSORS") {
-            if (takersChoicePlain == "PAPER") {     token.transferFrom(taker, msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == "ROCK") {      token.transferFrom(msg.sender, taker, 20 * 1e18); }
+        if (makersChoicePlain == 3) {
+            if (takersChoicePlain == 2) {   token.transferFrom(taker, msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == 1) {   token.transferFrom(msg.sender, taker, 20 * 1e18); }
         }
     }
 
-    function getMyChoiceHash(string memory makersChoicePlain, string memory salt) external view returns (bytes32 hash) {
+    function getMyChoiceHash(uint8 makersChoicePlain, string memory salt) external view returns (bytes32 hash) {
         hash = _getChoiceHashFor(msg.sender, makersChoicePlain, keccak256(salt));
     }
 
-    function _getChoiceHashFor(address maker, string memory makersChoicePlain, string memory salt) private pure returns (bytes32 hash) {
+    function _getChoiceHashFor(address maker, uint8 makersChoicePlain, string memory salt) private pure returns (bytes32 hash) {
         hash = keccak256(
             abi.encodePacked(
                 maker,
