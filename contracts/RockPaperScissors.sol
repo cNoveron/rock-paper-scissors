@@ -10,6 +10,17 @@ import "hardhat/console.sol";
 
 // This is the main building block for smart contracts.
 contract RockPaperScissors {
+
+    struct TakenBet{
+        address taker,
+        uint256 deadline,
+        bytes32 makersChoiceHash,
+        string takersChoicePlain
+    }
+
+    mapping(address => TakenBet) currentBet;
+
+
     function take(
         uint8 v,
         bytes32 r,
@@ -41,7 +52,7 @@ contract RockPaperScissors {
 
         bytes32 hashStruct = keccak256(
             abi.encode(
-                keccak256("set(address maker,uint choiceHashA,uint choiceHashB,uint deadline)"),
+                keccak256("TakenBet(address maker,uint256 deadline,bytes32 makersChoiceHash,string takersChoicePlain)"),
                 maker,
                 deadline,
                 makersChoiceHash,
@@ -55,7 +66,7 @@ contract RockPaperScissors {
         require(signer != address(0), "ECDSA: invalid signature");
 
         require(currentOpponent[maker].taker == address(0), "take: bet is already taken");
-        currentOpponent[maker] = takenBet(msg.sender, deadline, makersChoiceHash, takersChoicePlain);
+        currentBet[maker] = TakenBet(msg.sender, deadline, makersChoiceHash, takersChoicePlain);
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 }
