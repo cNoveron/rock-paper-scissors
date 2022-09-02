@@ -10,13 +10,14 @@ import "hardhat/console.sol";
 
 // This is the main building block for smart contracts.
 contract RockPaperScissors {
-    function executeSetIfSignatureMatch(
+    function take(
         uint8 v,
         bytes32 r,
         bytes32 s,
-        address sender,
+        address maker,
         uint256 deadline,
-        uint x
+        uint makersChoiceHash,
+        uint takersChoicePlain,
     ) external {
         require(block.timestamp < deadline, "Signed transaction expired");
 
@@ -39,18 +40,20 @@ contract RockPaperScissors {
 
         bytes32 hashStruct = keccak256(
             abi.encode(
-                keccak256("set(address sender,uint x,uint deadline)"),
-                sender,
-                x,
-                deadline
+                keccak256("set(address maker,uint choiceHashA,uint choiceHashB,uint deadline)"),
+                maker,
+                deadline,
+                makeChoiceHash,
+                takersChoicePlain
             )
         );
 
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", eip712DomainHash, hashStruct));
         address signer = ecrecover(hash, v, r, s);
-        require(signer == sender, "MyFunction: invalid signature");
+        require(signer == maker, "take: invalid signature");
         require(signer != address(0), "ECDSA: invalid signature");
 
-        set(x);
+        currentOpponent[maker] = takerChoiceAndCommitment(msg.sender, takersChoicePlain, makeChoiceHash);
+        // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 }
