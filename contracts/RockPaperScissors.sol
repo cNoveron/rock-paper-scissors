@@ -19,7 +19,7 @@ contract RockPaperScissors {
         bytes32 makersChoiceHash,
         string takersChoicePlain
     ) external {
-        //require(msg.sender != maker, "RPS: You can't play against yourself");
+        //require(msg.sender != maker, "take: You can't play against yourself");
         require(block.timestamp < deadline, "Signed transaction expired");
 
         uint chainId;
@@ -44,7 +44,7 @@ contract RockPaperScissors {
                 keccak256("set(address maker,uint choiceHashA,uint choiceHashB,uint deadline)"),
                 maker,
                 deadline,
-                makeChoiceHash,
+                makersChoiceHash,
                 takersChoicePlain
             )
         );
@@ -54,7 +54,8 @@ contract RockPaperScissors {
         require(signer == maker, "take: invalid signature");
         require(signer != address(0), "ECDSA: invalid signature");
 
-        currentOpponent[maker] = takerChoiceAndCommitment(msg.sender, takersChoicePlain, makeChoiceHash);
+        require(currentOpponent[maker].taker == address(0), "take: bet is already taken");
+        currentOpponent[maker] = takenBet(msg.sender, deadline, makersChoiceHash, takersChoicePlain);
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 }
