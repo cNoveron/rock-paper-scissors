@@ -69,4 +69,48 @@ contract RockPaperScissors {
         currentBet[maker] = TakenBet(msg.sender, deadline, makersChoiceHash, takersChoicePlain);
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
+
+    function reveal(string makersChoicePlain, string salt) {
+        
+        bytes32 eip712DomainHash = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256(bytes("SetTest")),
+                keccak256(bytes("1")),
+                chainId,
+                address(this)
+            )
+        );  
+
+        bytes32 hashStruct = keccak256(
+            abi.encode(
+                bytes32(makersChoicePlain),
+                keccak256(salt)
+            )
+        );
+
+        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", eip712DomainHash, hashStruct));
+        require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
+        string takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
+        if (makersChoicePlain == takersChoicePlain) {
+            token.transfer(msg.sender, 10 * 1e18);
+            token.transfer(currentBet[msg.sender].taker, 10 * 1e18);
+        } else
+        if (makersChoicePlain == "ROCK") {
+            if (takersChoicePlain == "SCISSORS") {  token.transfer(msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == "PAPER") {     token.transfer(currentBet[msg.sender].taker, 20 * 1e18); }
+        } else
+        if (makersChoicePlain == "PAPER") {
+            if (takersChoicePlain == "ROCK") {      token.transfer(msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == "SCISSORS") {  token.transfer(currentBet[msg.sender].taker, 20 * 1e18); }
+        } else
+        if (makersChoicePlain == "SCISSORS") {
+            if (takersChoicePlain == "PAPER") {     token.transfer(msg.sender, 20 * 1e18); } else
+            if (takersChoicePlain == "ROCK") {      token.transfer(currentBet[msg.sender].taker, 20 * 1e18); }
+        }
+    }
+
+    // getChoiceHash()
 }
