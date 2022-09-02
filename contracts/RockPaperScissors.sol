@@ -16,8 +16,8 @@ contract RockPaperScissors {
         bytes32 s,
         address maker,
         uint256 deadline,
-        uint makersChoiceHash,
-        uint takersChoicePlain
+        bytes32 makersChoiceHash,
+        string takersChoicePlain
     ) external {
         //require(msg.sender != maker, "RPS: You can't play against yourself");
         require(block.timestamp < deadline, "Signed transaction expired");
