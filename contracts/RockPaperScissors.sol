@@ -70,7 +70,7 @@ contract RockPaperScissors {
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 
-    function reveal(string makersChoicePlain, string salt) {
+    function reveal(string makersChoicePlain, string salt) external {
         
         bytes32 eip712DomainHash = keccak256(
             abi.encode(
@@ -106,11 +106,11 @@ contract RockPaperScissors {
         }
     }
 
-    function getMyChoiceHash(string makersChoicePlain, string salt) view returns (bytes32 hash) {
+    function getMyChoiceHash(string makersChoicePlain, string salt) external view returns (bytes32 hash) {
         hash = _getChoiceHash(msg.sender, makersChoicePlain, keccak256(salt));
     }
 
-    function _getChoiceHashFor(address maker, string makersChoicePlain, string salt) pure returns (bytes32 hash) {
+    function _getChoiceHashFor(address maker, string makersChoicePlain, string salt) private pure returns (bytes32 hash) {
         hash = keccak256(
             abi.encodePacked(
                 maker,
