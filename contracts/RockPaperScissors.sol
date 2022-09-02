@@ -7,7 +7,7 @@ pragma solidity ^0.7.0;
 // We import this library to be able to use console.log
 import "hardhat/console.sol";
 
-import "hardhat/console.sol";
+import "./IERC20.sol";
 
 // This is the main building block for smart contracts.
 contract RockPaperScissors {
@@ -30,7 +30,7 @@ contract RockPaperScissors {
         address maker,
         uint256 deadline,
         bytes32 makersChoiceHash,
-        string takersChoicePlain,
+        string memory takersChoicePlain,
         address payoutToken
     ) external {
         //require(msg.sender != maker, "take: You can't play against yourself");
@@ -72,7 +72,7 @@ contract RockPaperScissors {
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 
-    function reveal(string makersChoicePlain, string salt) external {
+    function reveal(string memory makersChoicePlain, string memory salt) external {
         uint chainId;
         assembly {chainId := chainid()}
 
@@ -91,7 +91,7 @@ contract RockPaperScissors {
         bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
         require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
 
-        string takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
+        string memory takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
         address taker = currentBet[msg.sender].taker;
         IERC20 token = IERC20(currentBet[msg.sender].payoutToken);
 
@@ -113,11 +113,11 @@ contract RockPaperScissors {
         }
     }
 
-    function getMyChoiceHash(string makersChoicePlain, string salt) external view returns (bytes32 hash) {
-        hash = _getChoiceHash(msg.sender, makersChoicePlain, keccak256(salt));
+    function getMyChoiceHash(string memory makersChoicePlain, string memory salt) external view returns (bytes32 hash) {
+        hash = _getChoiceHashFor(msg.sender, makersChoicePlain, keccak256(salt));
     }
 
-    function _getChoiceHashFor(address maker, string makersChoicePlain, string salt) private pure returns (bytes32 hash) {
+    function _getChoiceHashFor(address maker, string memory makersChoicePlain, string memory salt) private pure returns (bytes32 hash) {
         hash = keccak256(
             abi.encodePacked(
                 maker,
