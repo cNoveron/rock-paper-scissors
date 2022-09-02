@@ -12,10 +12,10 @@ import "hardhat/console.sol";
 contract RockPaperScissors {
 
     struct TakenBet{
-        address taker,
-        uint256 deadline,
-        bytes32 makersChoiceHash,
-        string takersChoicePlain
+        address taker;
+        uint256 deadline;
+        bytes32 makersChoiceHash;
+        string takersChoicePlain;
     }
 
     mapping(address => TakenBet) currentBet;
