@@ -95,10 +95,6 @@ contract RockPaperScissors {
         address taker = currentBet[msg.sender].taker;
         IERC20 token = IERC20(currentBet[msg.sender].payoutToken);
 
-        if (makersChoicePlain == takersChoicePlain) {
-            token.transfer(msg.sender, 10 * 1e18);
-            token.transfer(currentBet[msg.sender].taker, 10 * 1e18);
-        } else
         if (makersChoicePlain == 1) {
             if (takersChoicePlain == 3) {
                 token.transferFrom(taker, msg.sender, 20 * 1e18); 
