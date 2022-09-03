@@ -98,7 +98,7 @@ contract RockPaperScissors {
         if (makersChoicePlain == 1) {
             if (takersChoicePlain == 3) {
                 token.transferFrom(taker, msg.sender, 20 * 1e18); 
-                emit Winner(maker, 20 * 1e18);
+                emit Winner(msg.sender, 20 * 1e18);
             } else
             if (takersChoicePlain == 2) {   
                 token.transferFrom(msg.sender, taker, 20 * 1e18);  
@@ -108,7 +108,7 @@ contract RockPaperScissors {
         if (makersChoicePlain == 2) {
             if (takersChoicePlain == 1) {
                 token.transferFrom(taker, msg.sender, 20 * 1e18);
-                emit Winner(maker, 20 * 1e18); 
+                emit Winner(msg.sender, 20 * 1e18); 
             } else
             if (takersChoicePlain == 3) {
                 token.transferFrom(msg.sender, taker, 20 * 1e18);  
@@ -118,7 +118,7 @@ contract RockPaperScissors {
         if (makersChoicePlain == 3) {
             if (takersChoicePlain == 2) {
                 token.transferFrom(taker, msg.sender, 20 * 1e18); 
-                emit Winner(maker, 20 * 1e18); 
+                emit Winner(msg.sender, 20 * 1e18); 
             } else
             if (takersChoicePlain == 1) {
                 token.transferFrom(msg.sender, taker, 20 * 1e18); 
