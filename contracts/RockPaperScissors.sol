@@ -100,18 +100,38 @@ contract RockPaperScissors {
             token.transfer(currentBet[msg.sender].taker, 10 * 1e18);
         } else
         if (makersChoicePlain == 1) {
-            if (takersChoicePlain == 3) {   token.transferFrom(taker, msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == 2) {   token.transferFrom(msg.sender, taker, 20 * 1e18); }
+            if (takersChoicePlain == 3) {
+                token.transferFrom(taker, msg.sender, 20 * 1e18); 
+                emit Winner(maker, 20 * 1e18);
+            } else
+            if (takersChoicePlain == 2) {   
+                token.transferFrom(msg.sender, taker, 20 * 1e18);  
+                emit Winner(taker, 20 * 1e18);
+            }
         } else
         if (makersChoicePlain == 2) {
-            if (takersChoicePlain == 1) {   token.transferFrom(taker, msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == 3) {   token.transferFrom(msg.sender, taker, 20 * 1e18); }
+            if (takersChoicePlain == 1) {
+                token.transferFrom(taker, msg.sender, 20 * 1e18);
+                emit Winner(maker, 20 * 1e18); 
+            } else
+            if (takersChoicePlain == 3) {
+                token.transferFrom(msg.sender, taker, 20 * 1e18);  
+                emit Winner(taker, 20 * 1e18);
+            }
         } else
         if (makersChoicePlain == 3) {
-            if (takersChoicePlain == 2) {   token.transferFrom(taker, msg.sender, 20 * 1e18); } else
-            if (takersChoicePlain == 1) {   token.transferFrom(msg.sender, taker, 20 * 1e18); }
+            if (takersChoicePlain == 2) {
+                token.transferFrom(taker, msg.sender, 20 * 1e18); 
+                emit Winner(maker, 20 * 1e18); 
+            } else
+            if (takersChoicePlain == 1) {
+                token.transferFrom(msg.sender, taker, 20 * 1e18); 
+                emit Winner(taker, 20 * 1e18);
+            }
         }
     }
+
+    event Winner(address winner, uint256 amount);
 
     function getMyChoiceHash(uint8 makersChoicePlain, bytes memory salt) external view returns (bytes32 hash) {
         hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
