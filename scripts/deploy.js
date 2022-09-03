@@ -19,17 +19,28 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
+  const RockPaperScissors = await ethers.getContractFactory("RockPaperScissors");
+  const rockPaperScissors = await RockPaperScissors.deploy();
+  await rockPaperScissors.deployed();
 
-  console.log("Token address:", token.address);
+  const Token = await ethers.getContractFactory("ERC20");
+  const usdc = await Token.deploy("USD Coin", "USDC");
+  const weth = await Token.deploy("Wrapped Ether", "WETH");
+  await usdc.deployed();
+  await weth.deployed();
+  console.table({
+    rockPaperScissors: { address: rockPaperScissors.address },
+    usdc: { address: usdc.address },
+    weth: { address: weth.address },
+  });
 
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token);
+  saveFrontendFiles("RockPaperScissors", rockPaperScissors);
+  saveFrontendFiles("ERC20", usdc);
+  saveFrontendFiles("ERC20", weth);
 }
 
-function saveFrontendFiles(token) {
+function saveFrontendFiles(contract, instance) {
   const fs = require("fs");
   const contractsDir = __dirname + "/../frontend/src/contracts";
 
@@ -39,14 +50,14 @@ function saveFrontendFiles(token) {
 
   fs.writeFileSync(
     contractsDir + "/contract-address.json",
-    JSON.stringify({ Token: token.address }, undefined, 2)
+    JSON.stringify({ [contract]: instance.address }, undefined, 2)
   );
 
-  const TokenArtifact = artifacts.readArtifactSync("Token");
+  const artifact = artifacts.readArtifactSync(contract);
 
   fs.writeFileSync(
-    contractsDir + "/Token.json",
-    JSON.stringify(TokenArtifact, null, 2)
+    contractsDir + `/${contract}.json`,
+    JSON.stringify(artifact, null, 2)
   );
 }
 
