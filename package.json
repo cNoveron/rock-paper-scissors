@@ -33,6 +33,8 @@
     "husky": "^4.2.5"
   },
   "dependencies": {
-    "@metamask/eth-sig-util": "^4.0.1"
+    "@metamask/eth-sig-util": "^4.0.1",
+    "ethereumjs-abi": "^0.6.8",
+    "ethereumjs-util": "^6.2.1"
   }
 }
