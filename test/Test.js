@@ -319,8 +319,11 @@ describe("Token contract", function () {
     const { r, s, v } = signature
 
     let res;
-    res = await rps.connect(taker).take(v,r,s,maker.address,deadline,makersChoiceHash,takersChoice,usdc.address)
-    await res.wait(1)
+    res = await rps.connect(taker).take(v,r,s,
+      maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
+    await res.wait()
+    res = await rps.connect(maker).reveal(makersChoice, salt)
+    await res.wait()
   }
 
   const salt = "0xb329ab3b6b29"
@@ -328,8 +331,6 @@ describe("Token contract", function () {
 
     before(async function(){
       makeAndTake(alice, 1, bob, 3, salt)
-      res = await rps.reveal(1, salt)
-      await res.wait(1)
     });
 
     it("Alice should have 120 USDC in her wallet", async function(){
@@ -343,12 +344,10 @@ describe("Token contract", function () {
     })
   });
 
-  describe("Bob chooses paper and charlie choses scissors", function () {
+  describe("Bob chooses paper and Charlie choses scissors", function () {
 
     before(async function(){
       makeAndTake(bob, 2, charlie, 3, salt)
-      res = await rps.connect(bob).reveal(2, salt)
-      await res.wait(1)
     });
 
     it("Bob should have 80 USDC in her wallet", async function(){
