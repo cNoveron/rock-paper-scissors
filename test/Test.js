@@ -19,9 +19,10 @@ async function getLatestTimestamp(provider) {
   return parseInt((await getLatestBlock(provider)).timestamp.toString())
 }
 
-function atomicUnits(n) {
+function toAtomicUnits(n) {
   return BigNumber.from(n).mul(BigNumber.from(10).pow(18))
 }
+
 
 const TYPED_MESSAGE_SCHEMA = {
   type: 'object',
@@ -248,18 +249,25 @@ getSignature = async (
     'V4'
   )
 }
-
-let rps;
-let usdc;
-let weth;
-let alice;
-let bob;
-let charlie;
-let provider;
-
 describe("Token contract", function () {
+  // Mocha has four functions that let you hook into the the test runner's
+  // lifecyle. These are: `before`, `beforeEach`, `after`, `afterEach`.
 
-  before(async function () {
+  // They're very useful to setup the environment for tests, and to clean it
+  // up after they run.
+
+  // A common pattern is to declare some variables, and assign them in the
+  // `before` and `beforeEach` callbacks.
+
+  let rps;
+  let usdc;
+  let weth;
+  let alice;
+  let bob;
+  let charlie;
+  let provider;
+
+  beforeEach(async function () {
     [alice, bob, charlie, ...addrs] = await hre.ethers.getSigners()
     provider = hre.ethers.provider
 
@@ -274,14 +282,9 @@ describe("Token contract", function () {
     await weth.deployed();
 
     let r
-    
     r = await usdc.mint(alice.address, BigNumber.from(10).pow(18).mul(100))
     r = await usdc.mint(bob.address, BigNumber.from(10).pow(18).mul(100))
     r = await usdc.mint(charlie.address, BigNumber.from(10).pow(18).mul(100))
-
-    r = await weth.mint(alice.address, BigNumber.from(10).pow(18).mul(100))
-    r = await weth.mint(bob.address, BigNumber.from(10).pow(18).mul(100))
-    r = await weth.mint(charlie.address, BigNumber.from(10).pow(18).mul(100))
     
     r = await usdc
       .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
@@ -304,60 +307,47 @@ describe("Token contract", function () {
     await r.wait()
   });
 
-  async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
-    const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
-    const milsec_deadline = Date.now() / 1000 + 1000;
-    const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
-    const signature = await getSignature(
-      rps.address,
-      maker,
-      deadline,
-      makersChoiceHash,
-      takersChoice,
-      usdc.address
-    )
-    const { r, s, v } = signature
+  // You can nest describe calls to create subsections.
+  describe("Deployment", function () {
+    // `it` is another Mocha function. This is the one you use to define your
+    // tests. It receives the test name, and a callback function.
 
-    let res;
-    res = await rps.connect(taker).take(v,r,s,
-      maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
-    await res.wait()
-    res = await rps.connect(maker).reveal(makersChoice, salt)
-    await res.wait()
-  }
+    // If the callback function is async, Mocha will `await` it.
+    it.only("Should set the right owner", async function () {
 
-  const salt = "0xb329ab3b6b29"
-  describe("Alice chooses rock and Bob choses scissors", function () {
+      const salt = "0xb329ab3b6b29"
+      const makersChoiceHash = await rps.getMyChoiceHash(1,salt)
 
-    before(async function(){
-      makeAndTake(alice, 1, bob, 3, salt)
-    });
+      const milsec_deadline = Date.now() / 1000 + 1000;
+      console.log(milsec_deadline, "milisec");
+      const deadline = parseInt(String(milsec_deadline).slice(0, 10));
+      console.log(deadline, "sec");
 
-    it("Alice should have 120 USDC in her wallet", async function(){
+      const signature = await getSignature(
+        rps.address,
+        alice,
+        deadline,
+        makersChoiceHash,
+        3,
+        usdc.address
+      )
+
+      const { r, s, v } = signature
+      console.log("r:", r);
+      console.log("s:", s);
+      console.log("v:", v);
+
+      let res;
+      res = await rps.connect(bob).take(v,r,s,alice.address,deadline,makersChoiceHash,3,usdc.address)
+      await res.wait(1)
+      
+      res = await rps.reveal(1, salt)
+      await res.wait(1)
+
       const aliceBal = await usdc.balanceOf(alice.address)
-      expect(aliceBal).to.equal(atomicUnits(120));
-    })
-
-    it("Bob should have 80 USDC in his wallet", async function(){
+      expect(aliceBal).to.equal(toAtomicUnits(120));
       const bobBal = await usdc.balanceOf(bob.address)
-      expect(bobBal).to.equal(atomicUnits(80));
-    })
-  });
-
-  describe("Bob chooses paper and Charlie choses scissors", function () {
-
-    before(async function(){
-      makeAndTake(bob, 2, charlie, 3, salt)
+      expect(bobBal).to.equal(toAtomicUnits(80));
     });
-
-    it("Bob should have 80 USDC in her wallet", async function(){
-      const bobBal = await usdc.balanceOf(alice.address)
-      expect(bobBal).to.equal(atomicUnits(120));
-    })
-
-    it("Bob should have 120 USDC in his wallet", async function(){
-      const charlieBal = await usdc.balanceOf(charlie.address)
-      expect(charlieBal).to.equal(atomicUnits(80));
-    })
   });
 });
