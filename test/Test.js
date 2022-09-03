@@ -342,4 +342,23 @@ describe("Token contract", function () {
       expect(bobBal).to.equal(atomicUnits(80));
     })
   });
+
+  describe("Bob chooses paper and charlie choses scissors", function () {
+
+    before(async function(){
+      makeAndTake(bob, 2, charlie, 3, salt)
+      res = await rps.connect(bob).reveal(2, salt)
+      await res.wait(1)
+    });
+
+    it("Bob should have 80 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(alice.address)
+      expect(bobBal).to.equal(atomicUnits(120));
+    })
+
+    it("Bob should have 120 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(atomicUnits(80));
+    })
+  });
 });
