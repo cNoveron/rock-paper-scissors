@@ -319,7 +319,7 @@ describe("Token contract", function () {
     const { r, s, v } = signature
 
     let res;
-    res = await rps.connect(taker).take(v,r,s,alice.address,deadline,makersChoiceHash,3,usdc.address)
+    res = await rps.connect(taker).take(v,r,s,maker.address,deadline,makersChoiceHash,takersChoice,usdc.address)
     await res.wait(1)
   }
 
@@ -327,7 +327,7 @@ describe("Token contract", function () {
   describe("Alice chooses rock and Bob choses scissors", function () {
 
     before(async function(){
-      makeAndTake(alice, 1, bob, 2, salt)
+      makeAndTake(alice, 1, bob, 3, salt)
       res = await rps.reveal(1, salt)
       await res.wait(1)
     });
