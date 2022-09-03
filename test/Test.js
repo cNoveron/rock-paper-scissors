@@ -313,7 +313,7 @@ describe("Token contract", function () {
     // tests. It receives the test name, and a callback function.
 
     // If the callback function is async, Mocha will `await` it.
-    it.only("Should set the right owner", async function () {
+    it("Should set the right owner", async function () {
 
       const salt = "0xb329ab3b6b29"
       const makersChoiceHash = await rps.getMyChoiceHash(1,salt)
@@ -349,5 +349,13 @@ describe("Token contract", function () {
       const bobBal = await usdc.balanceOf(bob.address)
       expect(bobBal).to.equal(toAtomicUnits(80));
     });
+
+    /* 
+      TO DO:
+      - When tying, nothing should happen 
+      - Should revert when revealing something different
+      - Should not be able to play against one's self
+      - When the deadline is surpassed, revealing should do nothing
+     */
   });
 });
