@@ -207,7 +207,7 @@ signTypedData = function (privateKey, msgParams) {
   return sig
 },
 
-getSignature = async (
+getBetSig = async (
   verifyingContract, 
   maker,
   deadline,
@@ -215,7 +215,7 @@ getSignature = async (
   takersChoicePlain,
   payoutToken
 ) => {
-  const domain = {name:"SetTest",version:"1",chainId: await maker.getChainId(),verifyingContract}
+  const domain = { name:"SetTest", version:"1", chainId: await maker.getChainId(), verifyingContract }
   const types = {
     EIP712Domain: [
       {name:"name",type:"string"},
@@ -238,8 +238,8 @@ getSignature = async (
     takersChoicePlain,
     payoutToken,
   }
+
   const pk = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-  const pkBuff = Buffer.from("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", 'hex')
   return await signTypedData(
     pk, {
       data: {domain, types, message, primaryType: "TakenBet"},
@@ -249,6 +249,37 @@ getSignature = async (
     'V4'
   )
 }
+
+getSignature = async (
+  verifyingContract,
+  chainId,
+  primaryType,
+  types,
+  values
+) => {
+  const domain = { name:"SetTest", version:"1", chainId, verifyingContract }
+  const types = {
+    EIP712Domain: [
+      {name:"name",type:"string"},
+      {name:"version",type:"string"},
+      {name:"chainId",type:"uint256"},
+      {name:"verifyingContract",type:"address"}
+    ],
+    [primaryType]: types
+  };
+  const message = _.zipObject(types[primaryType].map((v) => v.name), values)
+
+  const pk = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+  return await signTypedData(
+    pk, {
+      data: {domain, types, message, primaryType},
+      privateKey: pk,
+      version: "V4"
+    }, 
+    'V4'
+  )
+}
+
 describe("Token contract", function () {
   // Mocha has four functions that let you hook into the the test runner's
   // lifecyle. These are: `before`, `beforeEach`, `after`, `afterEach`.
@@ -313,18 +344,73 @@ describe("Token contract", function () {
     const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
     const milsec_deadline = Date.now() / 1000 + 1000;
     const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
-    const signature = await getSignature(
-      rps.address,
-      maker,
-      deadline,
-      makersChoiceHash,
-      takersChoice,
-      usdc.address
+
+    const makersPermit = await getSignature1(
+      usdc.address,
+      await maker.getChainId(),
+      'Permit',
+      [
+        {name:"owner",type:"address"},
+        {name:"spender", type:"address"},
+        {name:"value",type:"uint256"},
+        {name:"nonce", type:"uint256"},
+        {name:"deadline", type:"uint256"},
+      ],
+      [ 
+        maker.address,
+        rps.address,
+        atomicUnits(20),
+        await usdc.nonces(maker.address),
+        deadline,
+      ]
     )
-    const { r, s, v } = signature
+
+    const makersBetSig = await getSignature1(
+      rps.address,
+      await maker.getChainId(),
+      'TakenBet',
+      [
+        {name:"owner",type:"address"},
+        {name:"deadline", type:"uint256"},
+        {name:"makersChoiceHash",type:"bytes32"},
+        {name:"takersChoicePlain",type:"uint8"},
+        {name:"payoutToken",type:"address"},
+      ],
+      [ 
+        maker,
+        deadline,
+        makersChoiceHash,
+        takersChoice,
+        usdc.address,
+      ]
+    )
+    
+    const takersPermit = await getSignature1(
+      usdc.address,
+      await taker.getChainId(),
+      'Permit',
+      [
+        {name:"owner",type:"address"},
+        {name:"spender", type:"address"},
+        {name:"value",type:"uint256"},
+        {name:"nonce", type:"uint256"},
+        {name:"deadline", type:"uint256"},
+      ],
+      [ 
+        taker.address,
+        rps.address,
+        atomicUnits(20),
+        await usdc.nonces(taker.address),
+        deadline,
+      ]
+    )
+
+    const v = [takersPermit.v, makersPermit.v, makersBetSig.v]
+    const r = [takersPermit.r, makersPermit.r, makersBetSig.r]
+    const s = [takersPermit.s, makersPermit.s, makersBetSig.s]
+
 
     let res;
-    
     res = await rps.connect(taker).take(v,r,s,
       maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
     await res.wait()
