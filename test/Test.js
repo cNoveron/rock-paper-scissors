@@ -363,7 +363,7 @@ describe("Token contract", function () {
       [ 
         maker.address,
         rps.address,
-        atomicUnits(20),
+      toAtomicUnits(20),
         await usdc.nonces(maker.address),
         deadline,
       ]
@@ -405,7 +405,7 @@ describe("Token contract", function () {
       [ 
         taker.address,
         rps.address,
-        atomicUnits(20),
+      toAtomicUnits(20),
         await usdc.nonces(taker.address),
         deadline,
       ]
@@ -438,7 +438,7 @@ describe("Token contract", function () {
 
     it("Bob should have 80 USDC in his wallet", async function(){
       const bobBal = await usdc.balanceOf(bob.address)
-      expect(bobBal).to.equal(atomicUnits(80));
+      expect(bobBal).to.equal(toAtomicUnits(80));
     })
   });
 
@@ -450,12 +450,12 @@ describe("Token contract", function () {
 
     it("Bob should have 80 USDC in his wallet", async function(){
       const bobBal = await usdc.balanceOf(bob.address)
-      expect(bobBal).to.equal(atomicUnits(80));
+      expect(bobBal).to.equal(toAtomicUnits(80));
     })
 
     it("Charlie should have 120 USDC in his wallet", async function(){
       const charlieBal = await usdc.balanceOf(charlie.address)
-      expect(charlieBal).to.equal(atomicUnits(120));
+      expect(charlieBal).to.equal(toAtomicUnits(120));
     })
   });
 
