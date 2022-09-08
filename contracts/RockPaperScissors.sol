@@ -23,23 +23,11 @@ contract RockPaperScissors {
     mapping(address => TakenBet) currentBet;
 
 
-    function take(
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        address maker,
-        uint256 deadline,
-        bytes32 makersChoiceHash,
-        uint8 takersChoicePlain,
-        address payoutToken
-    ) external {
-        //require(msg.sender != maker, "take: You can't play against yourself");
-        require(block.timestamp < deadline, "Signed transaction expired");
-
+    function _getDomainHash() private returns (bytes32 eip712DomainHash) {
         uint chainId;
-        assembly {chainId := chainid()}
-        
-        bytes32 eip712DomainHash = keccak256(
+        assembly { chainId := chainid() }
+
+        eip712DomainHash = keccak256(
             abi.encode(
                 keccak256(
                     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -50,6 +38,30 @@ contract RockPaperScissors {
                 address(this)
             )
         );  
+    }
+
+
+
+    function take(
+        uint8[3] v,
+        bytes32[3] r,
+        bytes32[3] s,
+        address maker,
+        uint256 deadline,
+        bytes32 makersChoiceHash,
+        uint8 takersChoicePlain,
+        address payoutToken
+    ) external {
+        //require(msg.sender != maker, "take: You can't play against yourself");
+        require(block.timestamp.add(2 days) < deadline, "Timewindow should be at least 2 days");
+
+        payoutToken.permit(msg.sender, address(this), 20 * 1e18, deadline, v[0], r[0], s[0]);
+        uint256 allowance = payoutToken.allowance(msg.sender, address(this));
+        require(20 * 1e18 <= allowance, "take: Permit taker failed");
+
+        payoutToken.permit(maker, address(this), 20 * 1e18, deadline, v[1], r[1], s[1]);
+        uint256 allowance = payoutToken.allowance(maker, address(this));
+        require(20 * 1e18 <= allowance, "take: Permit maker failed");
 
         bytes32 hashStruct = keccak256(
             abi.encode(
@@ -62,8 +74,8 @@ contract RockPaperScissors {
             )
         );
 
-        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", eip712DomainHash, hashStruct));
-        address signer = ecrecover(hash, v, r, s);
+        bytes32 hash = keccak256(abi.encodePacked("\x19\x01", _getDomainHash(), hashStruct));
+        address signer = ecrecover(hash, v[2], r[2], s[2]);
         require(signer == maker, "take: invalid signature");
         require(signer != address(0), "ECDSA: invalid signature");
 
@@ -72,22 +84,11 @@ contract RockPaperScissors {
         // Now the maker can reveal their bet before the deadline and claim the bet 
     }
 
+
+
+    event Winner(address winner, uint256 amount);
+
     function reveal(uint8 makersChoicePlain, bytes memory salt) external {
-        uint chainId;
-        assembly {chainId := chainid()}
-
-        bytes32 eip712DomainHash = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256(bytes("SetTest")),
-                keccak256(bytes("1")),
-                chainId,
-                address(this)
-            )
-        );  
-
         bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
         require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
 
@@ -127,11 +128,12 @@ contract RockPaperScissors {
         }
     }
 
-    event Winner(address winner, uint256 amount);
+
 
     function getMyChoiceHash(uint8 makersChoicePlain, bytes memory salt) external view returns (bytes32 hash) {
         hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
     }
+
 
     function _getChoiceHashFor(address maker, uint8 makersChoicePlain, bytes memory salt) private pure returns (bytes32 hash) {
         hash = keccak256(
