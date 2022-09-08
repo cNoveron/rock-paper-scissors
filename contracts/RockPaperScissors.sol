@@ -77,7 +77,7 @@ contract RockPaperScissors {
         address payoutToken
     ) external {
         //require(msg.sender != maker, "take: You can't play against yourself");
-        require(block.timestamp.add(2 days) < deadline, "Timewindow should be at least 2 days");
+        require(block.timestamp + 2 days < deadline, "Timewindow should be at least 2 days");
 
         payoutToken.permit(msg.sender, address(this), 20 * 1e18, deadline, v[0], r[0], s[0]);
         uint256 takerAllowance = payoutToken.allowance(msg.sender, address(this));
@@ -117,7 +117,7 @@ contract RockPaperScissors {
     event Winner(bytes32 betId, address winner, uint256 amount);
 
     function reveal(bytes32 betId, uint8 makersChoicePlain, bytes memory salt) external {
-        require(block.timestamp < takenBets[betId].deadline.sub(1 days), "reveal: You must reveal 1 day before deadline");
+        require(block.timestamp < takenBets[betId].deadline - 1 days, "reveal: You must reveal 1 day before deadline");
 
         bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
         require(takenBets[betId].makersChoiceHash == hash, "reveal: You didn't chose that move");
