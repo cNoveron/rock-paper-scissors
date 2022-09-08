@@ -165,7 +165,7 @@ contract RockPaperScissors {
         require(takenBets[betId].deadline < block.timestamp, "Bet expired");
 
         address maker = takenBets[betId].maker;
-        takenBets[betId].payoutToken.transferFrom(maker, msg.sender, 20 * 1e18); 
+        IERC20(takenBets[betId].payoutToken).transferFrom(maker, msg.sender, 20 * 1e18); 
         emit Winner(betId, msg.sender, 20 * 1e18);
     }
 }
