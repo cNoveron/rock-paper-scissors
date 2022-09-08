@@ -324,7 +324,7 @@ contract ERC20 is Context, IERC20 {
         );
     }
 
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external override {
         require(deadline >= block.timestamp, 'UniswapV2: EXPIRED');
         bytes32 digest = getPermitHash(owner, spender, value, deadline);
         address recoveredAddress = ecrecover(digest, v, r, s);
