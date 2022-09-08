@@ -103,7 +103,7 @@ contract RockPaperScissors {
         require(signer == maker, "take: invalid signature");
         require(signer != address(0), "ECDSA: invalid signature");
 
-        bytes32 betId = bytes32(abi.encodePacked(block.timestamp, msg.sender, hashStruct));
+        bytes32 betId = keccak256(abi.encodePacked(block.timestamp, msg.sender, hashStruct));
         require(takenBets[betId].taker == address(0), "take: bet is already taken");
         takenBets[betId] = TakenBet(maker, deadline, makersChoiceHash, takersChoicePlain, payoutToken, msg.sender);
         // Now the maker can reveal their bet before the deadline and claim the bet 
