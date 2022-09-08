@@ -307,48 +307,61 @@ describe("Token contract", function () {
     await r.wait()
   });
 
-  // You can nest describe calls to create subsections.
-  describe("Deployment", function () {
-    // `it` is another Mocha function. This is the one you use to define your
-    // tests. It receives the test name, and a callback function.
+  const salt = "0xb329ab3b6b29"
 
-    // If the callback function is async, Mocha will `await` it.
-    it("Should set the right owner", async function () {
+  async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
+    const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
+    const milsec_deadline = Date.now() / 1000 + 1000;
+    const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
+    const signature = await getSignature(
+      rps.address,
+      maker,
+      deadline,
+      makersChoiceHash,
+      takersChoice,
+      usdc.address
+    )
+    const { r, s, v } = signature
 
-      const salt = "0xb329ab3b6b29"
-      const makersChoiceHash = await rps.getMyChoiceHash(1,salt)
+    let res;
+    
+    res = await rps.connect(taker).take(v,r,s,
+      maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
+    await res.wait()
 
-      const milsec_deadline = Date.now() / 1000 + 1000;
-      console.log(milsec_deadline, "milisec");
-      const deadline = parseInt(String(milsec_deadline).slice(0, 10));
-      console.log(deadline, "sec");
+    res = await rps.connect(maker).reveal(makersChoice, salt)
+    await res.wait()
+  }
 
-      const signature = await getSignature(
-        rps.address,
-        alice,
-        deadline,
-        makersChoiceHash,
-        3,
-        usdc.address
-      )
+  describe("Alice chooses rock and Bob choses scissors", function () {
 
-      const { r, s, v } = signature
-      console.log("r:", r);
-      console.log("s:", s);
-      console.log("v:", v);
-
-      let res;
-      res = await rps.connect(bob).take(v,r,s,alice.address,deadline,makersChoiceHash,3,usdc.address)
-      await res.wait(1)
-      
-      res = await rps.reveal(1, salt)
-      await res.wait(1)
+    before(async function(){
+      await makeAndTake(alice, 1, bob, 3, salt)
+    });
 
       const aliceBal = await usdc.balanceOf(alice.address)
       expect(aliceBal).to.equal(toAtomicUnits(120));
       const bobBal = await usdc.balanceOf(bob.address)
-      expect(bobBal).to.equal(toAtomicUnits(80));
+      expect(bobBal).to.equal(atomicUnits(80));
+    })
+  });
+
+  describe("Bob chooses paper and Charlie choses scissors", function () {
+
+    before(async function(){
+      await makeAndTake(bob, 2, charlie, 3, salt)
     });
+
+    it("Bob should have 80 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(atomicUnits(80));
+    })
+
+    it("Charlie should have 120 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(atomicUnits(120));
+    })
+  });
 
     /* 
       TO DO:
@@ -357,5 +370,4 @@ describe("Token contract", function () {
       - Should not be able to play against one's self
       - When the deadline is surpassed, revealing should do nothing
      */
-  });
 });
