@@ -12,15 +12,6 @@ import "./IERC20.sol";
 // This is the main building block for smart contracts.
 contract RockPaperScissors {
 
-    struct TakenBet{
-        address taker;
-        uint256 deadline;
-        bytes32 makersChoiceHash;
-        uint8 takersChoicePlain;
-        address payoutToken;
-    }
-
-    mapping(address => TakenBet) currentBet;
 
 
     function _getDomainHash() private returns (bytes32 eip712DomainHash) {
@@ -40,6 +31,19 @@ contract RockPaperScissors {
         );  
     }
 
+
+
+    struct TakenBet{
+        address taker;
+        uint256 deadline;
+        bytes32 makersChoiceHash;
+        uint8 takersChoicePlain;
+        address payoutToken;
+    }
+
+    mapping(bytes32 => TakenBet) private takenBets;
+
+    mapping(address => uint256[]) public myActiveBets;
 
 
     function take(
@@ -79,9 +83,14 @@ contract RockPaperScissors {
         require(signer == maker, "take: invalid signature");
         require(signer != address(0), "ECDSA: invalid signature");
 
-        require(currentBet[maker].taker == address(0), "take: bet is already taken");
-        currentBet[maker] = TakenBet(msg.sender, deadline, makersChoiceHash, takersChoicePlain, payoutToken);
+        bytes32 betId = bytes32(abi.encodePacked(block.timestamp, msg.sender, hashStruct));
+        require(takenBets[betId].taker == address(0), "take: bet is already taken");
+        takenBets[betId] = TakenBet(msg.sender, maker, deadline, makersChoiceHash, takersChoicePlain, payoutToken);
         // Now the maker can reveal their bet before the deadline and claim the bet 
+
+        myActiveBets[maker] = betId;
+        myActiveBets[msg.sender] = betId;
+        // UI should query this mapping periodically
     }
 
 
