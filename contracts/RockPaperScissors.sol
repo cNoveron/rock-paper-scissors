@@ -13,7 +13,7 @@ import "./IERC20.sol";
 contract RockPaperScissors {
 
 
-    function _getDomainHash() private pure returns (bytes32 eip712DomainHash) {
+    function _getDomainHash() private view returns (bytes32 eip712DomainHash) {
         uint chainId;
         assembly { chainId := chainid() }
 
