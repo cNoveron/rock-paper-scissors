@@ -20,22 +20,23 @@ async function main() {
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
   const RockPaperScissors = await ethers.getContractFactory("RockPaperScissors");
-  const rockPaperScissors = await RockPaperScissors.deploy();
-  await rockPaperScissors.deployed();
+  rps = await RockPaperScissors.deploy();
+  await rps.deployed();
 
   const Token = await ethers.getContractFactory("ERC20");
-  const usdc = await Token.deploy("USD Coin", "USDC");
-  const weth = await Token.deploy("Wrapped Ether", "WETH");
+  usdc = await Token.deploy("USD Coin", "USDC");
+  weth = await Token.deploy("Wrapped Ether", "WETH");
   await usdc.deployed();
   await weth.deployed();
+
   console.table({
-    rockPaperScissors: { address: rockPaperScissors.address },
+    rockPaperScissors: { address: rps.address },
     usdc: { address: usdc.address },
     weth: { address: weth.address },
   });
 
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles("RockPaperScissors", rockPaperScissors);
+  saveFrontendFiles("RockPaperScissors", rps);
   saveFrontendFiles("ERC20", usdc);
   saveFrontendFiles("ERC20", weth);
 }
