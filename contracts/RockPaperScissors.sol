@@ -79,11 +79,11 @@ contract RockPaperScissors {
         //require(msg.sender != maker, "take: You can't play against yourself");
         require(block.timestamp + 2 days < deadline, "Timewindow should be at least 2 days");
 
-        payoutToken.permit(msg.sender, address(this), 20 * 1e18, deadline, v[0], r[0], s[0]);
+        IERC20(payoutToken).permit(msg.sender, address(this), 20 * 1e18, deadline, v[0], r[0], s[0]);
         uint256 takerAllowance = payoutToken.allowance(msg.sender, address(this));
         require(20 * 1e18 <= takerAllowance, "take: Permit taker failed");
 
-        payoutToken.permit(maker, address(this), 20 * 1e18, deadline, v[1], r[1], s[1]);
+        IERC20(payoutToken).permit(maker, address(this), 20 * 1e18, deadline, v[1], r[1], s[1]);
         uint256 makerAllowance = payoutToken.allowance(maker, address(this));
         require(20 * 1e18 <= makerAllowance, "take: Permit maker failed");
 
