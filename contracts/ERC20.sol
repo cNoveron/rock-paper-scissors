@@ -310,6 +310,8 @@ contract ERC20 is Context, IERC20 {
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
+    mapping(address => uint) public nonces;
+
     function getPermitHash(
         address owner, address spender, uint value, uint deadline
     ) public view returns (bytes32 digest) {
@@ -321,8 +323,6 @@ contract ERC20 is Context, IERC20 {
             )
         );
     }
-
-    mapping(address => uint) public nonces;
 
     function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
         require(deadline >= block.timestamp, 'UniswapV2: EXPIRED');
