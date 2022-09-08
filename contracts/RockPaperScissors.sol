@@ -161,7 +161,7 @@ contract RockPaperScissors {
 
     function claimUnrevealed(bytes32 betId) external {
         require(msg.sender == takenBets[betId].taker, "Only taker can claimUnrevealed");
-        require(takenBets[betId].deadline.sub(1 days) < block.timestamp, "Still not past the deadline");
+        require(takenBets[betId].deadline - 1 days < block.timestamp, "Still not past the deadline");
         require(takenBets[betId].deadline < block.timestamp, "Bet expired");
 
         address maker = takenBets[betId].maker;
