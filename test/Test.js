@@ -281,7 +281,99 @@ getSignature = async (
   )
 }
 
-describe("Token contract", function () {
+let rps;
+let usdc;
+let weth;
+let alice;
+let bob;
+let charlie;
+let provider;
+
+const salt = "0xb329ab3b6b29"
+
+async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
+  const milsec_deadline = (Date.now() / 1000) + 2*24*60*60;
+  const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
+
+  const makersPermit = await getSignature(
+    'USD Coin',
+    usdc.address,
+    await maker.getChainId(),
+    'Permit',
+    [
+      {name:"owner",type:"address"},
+      {name:"spender", type:"address"},
+      {name:"value",type:"uint256"},
+      {name:"nonce", type:"uint256"},
+      {name:"deadline", type:"uint256"},
+    ],
+    [ 
+      maker.address,
+      rps.address,
+      toAtomicUnits(20),
+      await usdc.nonces(maker.address),
+      deadline,
+    ]
+  )
+
+  const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
+  const makersBetSig = await getSignature(
+    'RockPaperScissors',
+    rps.address,
+    await maker.getChainId(),
+    'TakenBet',
+    [
+      {name:"owner",type:"address"},
+      {name:"deadline", type:"uint256"},
+      {name:"makersChoiceHash",type:"bytes32"},
+      {name:"takersChoicePlain",type:"uint8"},
+      {name:"payoutToken",type:"address"},
+    ],
+    [ 
+      maker,
+      deadline,
+      makersChoiceHash,
+      takersChoice,
+      usdc.address,
+    ]
+  )
+  
+  const takersPermit = await getSignature(
+    'USD Coin',
+    usdc.address,
+    await taker.getChainId(),
+    'Permit',
+    [
+      {name:"owner",type:"address"},
+      {name:"spender", type:"address"},
+      {name:"value",type:"uint256"},
+      {name:"nonce", type:"uint256"},
+      {name:"deadline", type:"uint256"},
+    ],
+    [ 
+      taker.address,
+      rps.address,
+      toAtomicUnits(20),
+      await usdc.nonces(taker.address),
+      deadline,
+    ]
+  )
+
+  const v = [takersPermit.v, makersPermit.v, makersBetSig.v]
+  const r = [takersPermit.r, makersPermit.r, makersBetSig.r]
+  const s = [takersPermit.s, makersPermit.s, makersBetSig.s]
+
+
+  let res;
+  res = await rps.connect(taker).take(v,r,s,
+    maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
+  await res.wait()
+
+  res = await rps.connect(maker).reveal(makersChoice, salt)
+  await res.wait()
+}
+
+describe("Token contract", async function () {
   // Mocha has four functions that let you hook into the the test runner's
   // lifecyle. These are: `before`, `beforeEach`, `after`, `afterEach`.
 
@@ -290,14 +382,6 @@ describe("Token contract", function () {
 
   // A common pattern is to declare some variables, and assign them in the
   // `before` and `beforeEach` callbacks.
-
-  let rps;
-  let usdc;
-  let weth;
-  let alice;
-  let bob;
-  let charlie;
-  let provider;
 
   beforeEach(async function () {
     [alice, bob, charlie, ...addrs] = await hre.ethers.getSigners()
@@ -313,7 +397,6 @@ describe("Token contract", function () {
     await usdc.deployed();
     await weth.deployed();
 
-    console.log(usdc.address)
 
     let r
     r = await usdc.mint(alice.address, BigNumber.from(10).pow(18).mul(100))
@@ -339,97 +422,14 @@ describe("Token contract", function () {
     r = await usdc.connect(charlie)
       .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
     await r.wait()
+    await makeAndTake(alice, 1, bob, 3, salt)
   });
 
-  const salt = "0xb329ab3b6b29"
+  describe("Alice chooses rock and Bob choses scissors", async function () {
 
-  async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
-    const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
-    const milsec_deadline = Date.now() / 1000 + 1000;
-    const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
-
-    const makersPermit = await getSignature(
-      'USD Coin',
-      usdc.address,
-      await maker.getChainId(),
-      'Permit',
-      [
-        {name:"owner",type:"address"},
-        {name:"spender", type:"address"},
-        {name:"value",type:"uint256"},
-        {name:"nonce", type:"uint256"},
-        {name:"deadline", type:"uint256"},
-      ],
-      [ 
-        maker.address,
-        rps.address,
-      toAtomicUnits(20),
-        await usdc.nonces(maker.address),
-        deadline,
-      ]
-    )
-
-    const makersBetSig = await getSignature(
-      'RockPaperScissors',
-      rps.address,
-      await maker.getChainId(),
-      'TakenBet',
-      [
-        {name:"owner",type:"address"},
-        {name:"deadline", type:"uint256"},
-        {name:"makersChoiceHash",type:"bytes32"},
-        {name:"takersChoicePlain",type:"uint8"},
-        {name:"payoutToken",type:"address"},
-      ],
-      [ 
-        maker,
-        deadline,
-        makersChoiceHash,
-        takersChoice,
-        usdc.address,
-      ]
-    )
-    
-    const takersPermit = await getSignature(
-      'USD Coin',
-      usdc.address,
-      await taker.getChainId(),
-      'Permit',
-      [
-        {name:"owner",type:"address"},
-        {name:"spender", type:"address"},
-        {name:"value",type:"uint256"},
-        {name:"nonce", type:"uint256"},
-        {name:"deadline", type:"uint256"},
-      ],
-      [ 
-        taker.address,
-        rps.address,
-      toAtomicUnits(20),
-        await usdc.nonces(taker.address),
-        deadline,
-      ]
-    )
-
-    const v = [takersPermit.v, makersPermit.v, makersBetSig.v]
-    const r = [takersPermit.r, makersPermit.r, makersBetSig.r]
-    const s = [takersPermit.s, makersPermit.s, makersBetSig.s]
-
-
-    let res;
-    res = await rps.connect(taker).take(v,r,s,
-      maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
-    await res.wait()
-
-    res = await rps.connect(maker).reveal(makersChoice, salt)
-    await res.wait()
-  }
-
-  describe("Alice chooses rock and Bob choses scissors", function () {
-
-    before(async function(){
-      await makeAndTake(alice, 1, bob, 3, salt)
-    });
+    // before(async function(){
+    //   await makeAndTake(alice, 1, bob, 3, salt)
+    // });
 
     it("Alice should have 120 USDC in her wallet", async function(){
       const aliceBal = await usdc.balanceOf(alice.address)
@@ -442,7 +442,7 @@ describe("Token contract", function () {
     })
   });
 
-  describe("Bob chooses paper and Charlie choses scissors", function () {
+  describe("Bob chooses paper and Charlie choses scissors", async function () {
 
     before(async function(){
       await makeAndTake(bob, 2, charlie, 3, salt)
@@ -459,11 +459,11 @@ describe("Token contract", function () {
     })
   });
 
-    /* 
-      TO DO:
-      - When tying, nothing should happen 
-      - Should revert when revealing something different
-      - Should not be able to play against one's self
-      - When the deadline is surpassed, revealing should do nothing
-     */
+  /* 
+    TO DO:
+    - When tying, nothing should happen 
+    - Should revert when revealing something different
+    - Should not be able to play against one's self
+    - When the deadline is surpassed, revealing should do nothing
+    */
 });
