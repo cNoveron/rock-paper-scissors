@@ -254,7 +254,7 @@ getSignature = async (
   verifyingContract,
   chainId,
   primaryType,
-  types,
+  customTypes,
   values
 ) => {
   const domain = { name:"SetTest", version:"1", chainId, verifyingContract }
@@ -265,7 +265,7 @@ getSignature = async (
       {name:"chainId",type:"uint256"},
       {name:"verifyingContract",type:"address"}
     ],
-    [primaryType]: types
+    [primaryType]: customTypes
   };
   const message = _.zipObject(types[primaryType].map((v) => v.name), values)
 
@@ -425,8 +425,12 @@ describe("Token contract", function () {
       await makeAndTake(alice, 1, bob, 3, salt)
     });
 
+    it("Alice should have 120 USDC in her wallet", async function(){
       const aliceBal = await usdc.balanceOf(alice.address)
       expect(aliceBal).to.equal(toAtomicUnits(120));
+    })
+
+    it("Bob should have 80 USDC in his wallet", async function(){
       const bobBal = await usdc.balanceOf(bob.address)
       expect(bobBal).to.equal(atomicUnits(80));
     })
@@ -438,7 +442,7 @@ describe("Token contract", function () {
       await makeAndTake(bob, 2, charlie, 3, salt)
     });
 
-    it("Bob should have 80 USDC in her wallet", async function(){
+    it("Bob should have 80 USDC in his wallet", async function(){
       const bobBal = await usdc.balanceOf(bob.address)
       expect(bobBal).to.equal(atomicUnits(80));
     })
