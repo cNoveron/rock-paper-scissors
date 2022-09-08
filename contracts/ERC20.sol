@@ -43,6 +43,8 @@ contract ERC20 is Context, IERC20 {
     string private _symbol;
     uint8 private _decimals;
 
+
+    bytes32 public DOMAIN_SEPARATOR;
     /**
      * @dev Sets the values for {name} and {symbol}, initializes {decimals} with
      * a default value of 18.
@@ -56,6 +58,19 @@ contract ERC20 is Context, IERC20 {
         _name = name_;
         _symbol = symbol_;
         _decimals = 18;
+        uint chainId;
+        assembly {
+            chainId := chainid
+        }
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
+                keccak256(bytes(name)),
+                keccak256(bytes('1')),
+                chainId,
+                address(this)
+            )
+        );
     }
 
     /**
@@ -306,7 +321,6 @@ contract ERC20 is Context, IERC20 {
 
 
 
-    bytes32 public DOMAIN_SEPARATOR;
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
