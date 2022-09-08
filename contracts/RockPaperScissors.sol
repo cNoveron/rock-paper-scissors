@@ -97,13 +97,15 @@ contract RockPaperScissors {
 
     event Winner(address winner, uint256 amount);
 
-    function reveal(uint8 makersChoicePlain, bytes memory salt) external {
-        bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
-        require(currentBet[msg.sender].makersChoiceHash == hash, "reveal: You didn't chose that move");
+    function reveal(bytes32 betId, uint8 makersChoicePlain, bytes memory salt) external {
+        require(block.timestamp < takenBets[betId].deadline.sub(1 days), "reveal: You must reveal 1 day before deadline");
 
-        uint8 takersChoicePlain = currentBet[msg.sender].takersChoicePlain;
-        address taker = currentBet[msg.sender].taker;
-        IERC20 token = IERC20(currentBet[msg.sender].payoutToken);
+        bytes32 hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
+        require(takenBets[betId].makersChoiceHash == hash, "reveal: You didn't chose that move");
+
+        uint8 takersChoicePlain = takenBets[betId].takersChoicePlain;
+        address taker = takenBets[betId].taker;
+        IERC20 token = IERC20(takenBets[betId].payoutToken);
 
         if (makersChoicePlain == 1) {
             if (takersChoicePlain == 3) {
