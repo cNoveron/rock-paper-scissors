@@ -13,7 +13,6 @@ import "./IERC20.sol";
 contract RockPaperScissors {
 
 
-
     function _getDomainHash() private returns (bytes32 eip712DomainHash) {
         uint chainId;
         assembly { chainId := chainid() }
@@ -29,6 +28,22 @@ contract RockPaperScissors {
                 address(this)
             )
         );  
+    }
+
+
+    function getMyChoiceHash(uint8 makersChoicePlain, bytes memory salt) external view returns (bytes32 hash) {
+        hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
+    }
+
+
+    function _getChoiceHashFor(address maker, uint8 makersChoicePlain, bytes memory salt) private pure returns (bytes32 hash) {
+        hash = keccak256(
+            abi.encodePacked(
+                maker,
+                makersChoicePlain,
+                salt
+            )
+        );
     }
 
 
@@ -140,19 +155,13 @@ contract RockPaperScissors {
     }
 
 
+    function claimUnrevealed(bytes32 betId) external {
+        require(msg.sender == takenBets[betId].taker, "Only taker can claimUnrevealed");
+        require(takenBets[betId].deadline.sub(1 days) < block.timestamp, "Still not past the deadline");
+        require(takenBets[betId].deadline < block.timestamp, "Bet expired");
 
-    function getMyChoiceHash(uint8 makersChoicePlain, bytes memory salt) external view returns (bytes32 hash) {
-        hash = _getChoiceHashFor(msg.sender, makersChoicePlain, salt);
-    }
-
-
-    function _getChoiceHashFor(address maker, uint8 makersChoicePlain, bytes memory salt) private pure returns (bytes32 hash) {
-        hash = keccak256(
-            abi.encodePacked(
-                maker,
-                makersChoicePlain,
-                salt
-            )
-        );
+        address maker = takenBets[betId].maker;
+        takenBets[betId].payoutToken.transferFrom(maker, msg.sender, 20 * 1e18); 
+        emit Winner(msg.sender, 20 * 1e18);
     }
 }
