@@ -49,11 +49,12 @@ contract RockPaperScissors {
 
 
     struct TakenBet{
-        address taker;
+        address maker;
         uint256 deadline;
         bytes32 makersChoiceHash;
         uint8 takersChoicePlain;
         address payoutToken;
+        address taker;
     }
 
     mapping(bytes32 => TakenBet) private takenBets;
@@ -104,7 +105,7 @@ contract RockPaperScissors {
 
         bytes32 betId = bytes32(abi.encodePacked(block.timestamp, msg.sender, hashStruct));
         require(takenBets[betId].taker == address(0), "take: bet is already taken");
-        takenBets[betId] = TakenBet(msg.sender, maker, deadline, makersChoiceHash, takersChoicePlain, payoutToken);
+        takenBets[betId] = TakenBet(maker, deadline, makersChoiceHash, takersChoicePlain, payoutToken, msg.sender);
         // Now the maker can reveal their bet before the deadline and claim the bet 
 
         emit BetTaken(betId, maker, msg.sender);
