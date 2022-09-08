@@ -67,9 +67,9 @@ contract RockPaperScissors {
 
 
     function take(
-        uint8[3] v,
-        bytes32[3] r,
-        bytes32[3] s,
+        uint8[3] memory v,
+        bytes32[3] memory r,
+        bytes32[3] memory s,
         address maker,
         uint256 deadline,
         bytes32 makersChoiceHash,
