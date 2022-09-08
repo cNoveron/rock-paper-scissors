@@ -251,13 +251,14 @@ getBetSig = async (
 }
 
 getSignature = async (
+  name,
   verifyingContract,
   chainId,
   primaryType,
   customTypes,
   values
 ) => {
-  const domain = { name:"SetTest", version:"1", chainId, verifyingContract }
+  const domain = { name, version:"1", chainId, verifyingContract }
   const types = {
     EIP712Domain: [
       {name:"name",type:"string"},
@@ -312,6 +313,8 @@ describe("Token contract", function () {
     await usdc.deployed();
     await weth.deployed();
 
+    console.log(usdc.address)
+
     let r
     r = await usdc.mint(alice.address, BigNumber.from(10).pow(18).mul(100))
     r = await usdc.mint(bob.address, BigNumber.from(10).pow(18).mul(100))
@@ -345,7 +348,8 @@ describe("Token contract", function () {
     const milsec_deadline = Date.now() / 1000 + 1000;
     const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
 
-    const makersPermit = await getSignature1(
+    const makersPermit = await getSignature(
+      'USD Coin',
       usdc.address,
       await maker.getChainId(),
       'Permit',
@@ -365,7 +369,8 @@ describe("Token contract", function () {
       ]
     )
 
-    const makersBetSig = await getSignature1(
+    const makersBetSig = await getSignature(
+      'RockPaperScissors',
       rps.address,
       await maker.getChainId(),
       'TakenBet',
@@ -385,7 +390,8 @@ describe("Token contract", function () {
       ]
     )
     
-    const takersPermit = await getSignature1(
+    const takersPermit = await getSignature(
+      'USD Coin',
       usdc.address,
       await taker.getChainId(),
       'Permit',
