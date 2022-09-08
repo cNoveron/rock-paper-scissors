@@ -58,7 +58,11 @@ contract RockPaperScissors {
 
     mapping(bytes32 => TakenBet) private takenBets;
 
-    mapping(address => uint256[]) public myActiveBets;
+    event BetTaken(
+        bytes32 indexed betId,
+        address indexed maker,
+        address indexed taker
+    );
 
 
     function take(
@@ -103,9 +107,8 @@ contract RockPaperScissors {
         takenBets[betId] = TakenBet(msg.sender, maker, deadline, makersChoiceHash, takersChoicePlain, payoutToken);
         // Now the maker can reveal their bet before the deadline and claim the bet 
 
-        myActiveBets[maker] = betId;
-        myActiveBets[msg.sender] = betId;
-        // UI should query this mapping periodically
+        emit BetTaken(betId, maker, msg.sender);
+        // UI should listen to these events
     }
 
 
