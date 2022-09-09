@@ -10,6 +10,8 @@ const hre = require('hardhat')
 // const { signTypedData } = require('eth-sig-util')
 const ethUtil = require('ethereumjs-util');
 const ethAbi = require('ethereumjs-abi');
+const _ = require('lodash');
+
 
 async function getLatestBlock(provider) {
   return provider.send('eth_getBlockByNumber', ['latest', true])
