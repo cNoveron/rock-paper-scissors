@@ -197,7 +197,6 @@ concatSig = function (v, r, s) {
   const sSig = ethUtil.fromSigned(s)
   const vSig = ethUtil.bufferToInt(v)
   const rStr = utils.zeroPad(ethUtil.toUnsigned(rSig), 32)
-  console.log('rStr : ', utils.hexlify(rStr))
   const sStr = utils.zeroPad(ethUtil.toUnsigned(sSig), 32)
   const vStr = ethUtil.intToHex(vSig)
   return utils.concat([rStr, sStr, vStr])
@@ -377,6 +376,8 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
   const r = [takersPermit.r, makersPermit.r, makersBetSig.r]
   const s = [takersPermit.s, makersPermit.s, makersBetSig.s]
 
+  // const events = rps.interface
+  // console.log(events)
 
   let res;
   res = await rps.connect(taker).take(v,r,s,
@@ -417,33 +418,13 @@ describe("Token contract", async function () {
     r = await usdc.mint(bob.address, BigNumber.from(10).pow(18).mul(100))
     r = await usdc.mint(charlie.address, BigNumber.from(10).pow(18).mul(100))
     
-    r = await usdc
-      .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
-    await r.wait()
-    r = await usdc.connect(bob)
-      .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
-    await r.wait()
-    r = await usdc.connect(charlie)
-      .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
-    await r.wait()
-
-    r = await weth
-      .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
-    await r.wait()
-    r = await weth.connect(bob)
-      .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
-    await r.wait()
-    r = await usdc.connect(charlie)
-      .approve(rps.address, BigNumber.from(10).pow(18).mul(100))
-    await r.wait()
-    await makeAndTake(alice, 1, bob, 3, salt)
   });
 
   describe("Alice chooses rock and Bob choses scissors", async function () {
 
-    // before(async function(){
-    //   await makeAndTake(alice, 1, bob, 3, salt)
-    // });
+    beforeEach(async function(){
+      await makeAndTake(alice, 1, bob, 3, salt)
+    });
 
     it("Alice should have 120 USDC in her wallet", async function(){
       const aliceBal = await usdc.balanceOf(alice.address)
@@ -458,7 +439,7 @@ describe("Token contract", async function () {
 
   describe("Bob chooses paper and Charlie choses scissors", async function () {
 
-    before(async function(){
+    beforeEach(async function(){
       await makeAndTake(bob, 2, charlie, 3, salt)
     });
 
