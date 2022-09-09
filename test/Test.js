@@ -258,7 +258,8 @@ getSignature = async (
   chainId,
   primaryType,
   customTypes,
-  values
+  values,
+  pk
 ) => {
   const domain = { name, version:"1", chainId, verifyingContract }
   const types = {
@@ -271,8 +272,7 @@ getSignature = async (
     [primaryType]: customTypes
   };
   const message = _.zipObject(types[primaryType].map((v) => v.name), values)
-
-  const pk = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+  // console.log('message:', message,'')
   return await signTypedData(
     pk, {
       data: {domain, types, message, primaryType},
@@ -293,10 +293,21 @@ let provider;
 
 const salt = "0xb329ab3b6b29"
 
+const getPk = (b) => 
+  b === "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" 
+  ? "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+  : b === "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" 
+    ? "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+    : b === "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" 
+      ? "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
+      : null
+
+
 async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
-  const milsec_deadline = (Date.now() / 1000) + 2*24*60*60;
+  const milsec_deadline = Date.now() + (2*24+1)*60*60*1000;
   const deadline =  parseInt(String(milsec_deadline).slice(0, 10));
 
+  const makerPk = getPk(maker.address)
   const makersPermit = await getSignature(
     'USD Coin',
     usdc.address,
@@ -315,7 +326,8 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
       toAtomicUnits(20).toString(),
       (await usdc.nonces(maker.address)).toString(),
       deadline,
-    ]
+    ],
+    makerPk,
   )
 
   const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
@@ -325,19 +337,18 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
     await maker.getChainId(),
     'TakenBet',
     [
-      {name:"owner",type:"address"},
+      {name:"maker",type:"address"},
       {name:"deadline", type:"uint256"},
       {name:"makersChoiceHash",type:"bytes32"},
-      {name:"takersChoicePlain",type:"uint8"},
       {name:"payoutToken",type:"address"},
     ],
     [ 
       maker.address,
       deadline,
       makersChoiceHash,
-      takersChoice,
       usdc.address,
-    ]
+    ],
+    makerPk,
   )
   
   const takersPermit = await getSignature(
@@ -358,7 +369,8 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
       toAtomicUnits(20).toString(),
       (await usdc.nonces(taker.address)).toString(),
       deadline,
-    ]
+    ],
+    getPk(taker.address),
   )
 
   const v = [takersPermit.v, makersPermit.v, makersBetSig.v]
