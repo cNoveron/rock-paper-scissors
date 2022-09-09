@@ -89,19 +89,18 @@ contract RockPaperScissors {
 
         bytes32 hashStruct = keccak256(
             abi.encode(
-                keccak256("TakenBet(address maker,uint256 deadline,bytes32 makersChoiceHash,uint8 takersChoicePlain,address payoutToken)"),
+                keccak256("TakenBet(address maker,uint256 deadline,bytes32 makersChoiceHash,address payoutToken)"),
                 maker,
                 deadline,
                 makersChoiceHash,
-                takersChoicePlain,
                 payoutToken
             )
         );
 
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", _getDomainHash(), hashStruct));
         address signer = ecrecover(hash, v[2], r[2], s[2]);
-        require(signer == maker, "take: invalid signature");
         require(signer != address(0), "ECDSA: invalid signature");
+        require(signer == maker, "take: invalid signature");
 
         bytes32 betId = keccak256(abi.encodePacked(block.timestamp, msg.sender, hashStruct));
         require(takenBets[betId].taker == address(0), "take: bet is already taken");
