@@ -384,7 +384,10 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
     maker.address, deadline, makersChoiceHash, takersChoice, usdc.address)
   await res.wait()
 
-  res = await rps.connect(maker).reveal(makersChoice, salt)
+  const filter = await rps.filters.BetTaken(null, maker.address)
+  const events = await rps.queryFilter(filter)
+
+  await rps.connect(maker).reveal(events[0].args.betId, makersChoice, salt)
   await res.wait()
 }
 
