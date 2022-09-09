@@ -329,7 +329,7 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
     makerPk,
   )
 
-  const makersChoiceHash = await rps.getMyChoiceHash(makersChoice,salt)
+  const makersChoiceHash = await rps.connect(maker).getMyChoiceHash(makersChoice,salt)
   const makersBetSig = await getSignature(
     'RockPaperScissors',
     rps.address,
@@ -387,7 +387,7 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
   const filter = await rps.filters.BetTaken(null, maker.address)
   const events = await rps.queryFilter(filter)
 
-  await rps.connect(maker).reveal(events[0].args.betId, makersChoice, salt)
+  res = await rps.connect(maker).reveal(events[0].args.betId, makersChoice, salt)
   await res.wait()
 }
 
