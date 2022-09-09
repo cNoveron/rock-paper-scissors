@@ -312,8 +312,8 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
     [ 
       maker.address,
       rps.address,
-      toAtomicUnits(20),
-      await usdc.nonces(maker.address),
+      toAtomicUnits(20).toString(),
+      (await usdc.nonces(maker.address)).toString(),
       deadline,
     ]
   )
@@ -332,7 +332,7 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
       {name:"payoutToken",type:"address"},
     ],
     [ 
-      maker,
+      maker.address,
       deadline,
       makersChoiceHash,
       takersChoice,
@@ -355,8 +355,8 @@ async function makeAndTake(maker, makersChoice, taker, takersChoice, salt) {
     [ 
       taker.address,
       rps.address,
-      toAtomicUnits(20),
-      await usdc.nonces(taker.address),
+      toAtomicUnits(20).toString(),
+      (await usdc.nonces(taker.address)).toString(),
       deadline,
     ]
   )
