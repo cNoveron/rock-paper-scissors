@@ -423,6 +423,8 @@ describe("Token contract", async function () {
     
   });
 
+
+
   describe("Alice chooses rock and Bob choses scissors", async function () {
 
     beforeEach(async function(){
@@ -440,13 +442,223 @@ describe("Token contract", async function () {
     })
   });
 
-  describe("Bob chooses paper and Charlie choses scissors", async function () {
+  describe("Alice chooses rock and Bob choses paper", async function () {
 
     beforeEach(async function(){
-      await makeAndTake(bob, 2, charlie, 3, salt)
+      await makeAndTake(alice, 1, bob, 2, salt)
     });
 
-    it("Bob should have 80 USDC in his wallet", async function(){
+    it("Alice should have 80 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Bob should have 120 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+  describe("Alice chooses rock and Bob choses rock", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(alice, 1, bob, 1, salt)
+    });
+
+    it("Alice should have 100 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(100));
+    })
+
+    it("Bob should have 100 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(100));
+    })
+  });
+
+  describe("Alice chooses paper and Bob choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(alice, 2, bob, 3, salt)
+    });
+
+    it("Alice should have 100 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Bob should have 100 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+
+
+  describe("Alice chooses rock and Charlie choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(alice, 1, charlie, 3, salt)
+    });
+
+    it("Alice should have 120 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(120));
+    })
+
+    it("Charlie should have 80 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(80));
+    })
+  });
+
+  describe("Alice chooses rock and Charlie choses paper", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(alice, 1, charlie, 2, salt)
+    });
+
+    it("Alice should have 80 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Charlie should have 120 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+  describe("Alice chooses rock and Charlie choses rock", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(alice, 1, charlie, 1, salt)
+    });
+
+    it("Alice should have 100 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(100));
+    })
+
+    it("Charlie should have 100 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(100));
+    })
+  });
+
+  describe("Alice chooses paper and Charlie choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(alice, 2, charlie, 3, salt)
+    });
+
+    it("Alice should have 100 USDC in her wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Charlie should have 100 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+
+
+  describe("Bob chooses rock and Alice choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 1, alice, 3, salt)
+    });
+
+    it("Bob should have 120 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(120));
+    })
+
+    it("Alice should have 80 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(80));
+    })
+  });
+
+  describe("Bob chooses rock and Alice choses paper", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 1, alice, 2, salt)
+    });
+
+    it("Bob should have 80 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Alice should have 120 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+  describe("Bob chooses rock and Alice choses rock", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 1, alice, 1, salt)
+    });
+
+    it("Bob should have 100 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(100));
+    })
+
+    it("Alice should have 100 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(100));
+    })
+  });
+
+  describe("Bob chooses paper and Alice choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 2, alice, 3, salt)
+    });
+
+    it("Bob should have 100 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Alice should have 100 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+
+
+  describe("Bob chooses rock and Charlie choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 1, charlie, 3, salt)
+    });
+
+    it("Bob should have 120 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(120));
+    })
+
+    it("Charlie should have 80 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(80));
+    })
+  });
+
+  describe("Bob chooses rock and Charlie choses paper", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 1, charlie, 2, salt)
+    });
+
+    it("Bob should have 80 USDC in her wallet", async function(){
       const bobBal = await usdc.balanceOf(bob.address)
       expect(bobBal).to.equal(toAtomicUnits(80));
     })
@@ -457,6 +669,180 @@ describe("Token contract", async function () {
     })
   });
 
+  describe("Bob chooses rock and Charlie choses rock", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 1, charlie, 1, salt)
+    });
+
+    it("Bob should have 100 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(100));
+    })
+
+    it("Charlie should have 100 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(100));
+    })
+  });
+
+  describe("Bob chooses paper and Charlie choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(bob, 2, charlie, 3, salt)
+    });
+
+    it("Bob should have 100 USDC in her wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Charlie should have 100 USDC in his wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+
+
+  describe("Charlie chooses rock and Alice choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 1, alice, 3, salt)
+    });
+
+    it("Charlie should have 120 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(120));
+    })
+
+    it("Alice should have 80 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(80));
+    })
+  });
+
+  describe("Charlie chooses rock and Alice choses paper", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 1, alice, 2, salt)
+    });
+
+    it("Charlie should have 80 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Alice should have 120 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+  describe("Charlie chooses rock and Alice choses rock", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 1, alice, 1, salt)
+    });
+
+    it("Charlie should have 100 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(100));
+    })
+
+    it("Alice should have 100 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(100));
+    })
+  });
+
+  describe("Charlie chooses paper and Alice choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 2, alice, 3, salt)
+    });
+
+    it("Charlie should have 100 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Alice should have 100 USDC in his wallet", async function(){
+      const aliceBal = await usdc.balanceOf(alice.address)
+      expect(aliceBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+
+
+  describe("Charlie chooses rock and Bob choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 1, bob, 3, salt)
+    });
+
+    it("Charlie should have 120 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(120));
+    })
+
+    it("Bob should have 80 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(80));
+    })
+  });
+
+  describe("Charlie chooses rock and Bob choses paper", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 1, bob, 2, salt)
+    });
+
+    it("Charlie should have 80 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Bob should have 120 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(120));
+    })
+  });
+
+  describe("Charlie chooses rock and Bob choses rock", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 1, bob, 1, salt)
+    });
+
+    it("Charlie should have 100 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(100));
+    })
+
+    it("Bob should have 100 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(100));
+    })
+  });
+
+  describe("Charlie chooses paper and Bob choses scissors", async function () {
+
+    beforeEach(async function(){
+      await makeAndTake(charlie, 2, bob, 3, salt)
+    });
+
+    it("Charlie should have 100 USDC in her wallet", async function(){
+      const charlieBal = await usdc.balanceOf(charlie.address)
+      expect(charlieBal).to.equal(toAtomicUnits(80));
+    })
+
+    it("Bob should have 100 USDC in his wallet", async function(){
+      const bobBal = await usdc.balanceOf(bob.address)
+      expect(bobBal).to.equal(toAtomicUnits(120));
+    })
+  });
+  
   /* 
     TO DO:
     - When tying, nothing should happen 
